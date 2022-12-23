@@ -39,7 +39,7 @@ window.onload = function() {
     // Update the display with the correct number of hearts
     updateHeartsDisplay();
   });
-  console.log("ou have " + hearts + " hearts.");
+  console.log("Welcome back Ellen!");
 };
 
 
@@ -129,10 +129,9 @@ setInterval(function() {
       // Calculate the interval between the current time and the time the heart was added
       const interval = current - heart.addedTime;
       // Check if the interval is greater than 10 minutes (600000 milliseconds)
-      if (interval > 600000) {
+      if (interval > 43000000) {
         // Remove the heart
         removeHeart(heart.id);
-        console.log("heart removed");
         break;
       }
     }
