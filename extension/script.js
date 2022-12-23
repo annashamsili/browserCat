@@ -62,29 +62,27 @@ function updateHeartsDisplay() {
 function addHeart() {
   if (hearts < 5) {
     hearts += 1;
-    chrome.storage.local.set({ hearts: hearts });
-    // Create a new img element
-    const heart = document.createElement("img");
-    // Set its class to "heart"
-    
-    heart.classList.add("heart");
-    // Set a unique id
-    let date_now = Date.now();
-    heart.id = date_now
-    //chrome.storage.local.set({ [heart.id]: date_now });
-
-    //update 23rd dec
-    chrome.storage.local.get('hearts', function(result) {
-      let heartsArray = result.hearts || [];
-      heartsArray.push({ id: heart.id, addedTime: Date.now() });
-      chrome.storage.local.set({ hearts: heartsArray });
+    // Create a new heart object
+    const heart = {
+      id: Date.now(),
+      addedTime: Date.now()
+    };
+    // Get the current array of heart objects
+    chrome.storage.local.get("heartsArray", function(result) {
+      const heartsArray = result.heartsArray || [];
+      // Add the new heart object to the array
+      heartsArray.push(heart);
+      // Save the updated array to storage
+      chrome.storage.local.set({ heartsArray: heartsArray });
     });
-
-
-    console.log("Heart was added:", heart.id)
-    // Save the heart to storage
-    // Append the heart to the score element
-    document.getElementById("score").appendChild(heart);
+    // Create a new img element
+    const img = document.createElement("img");
+    // Set its class to "heart"
+    img.classList.add("heart");
+    // Set the unique id of the heart object
+    img.id = heart.id;
+    // Append the img element to the score element
+    document.getElementById("score").appendChild(img);
     // Update the display with the correct number of hearts
     updateHeartsDisplay();
   }
@@ -93,78 +91,42 @@ function addHeart() {
 // set removeHeart function
 
 function removeHeart(heartId) {
-    hearts -= 1;
-    if (hearts <= 0) {
-    hearts = 0;
-    }
-    //chrome.storage.local.set({ hearts: hearts });
-    // Get the first child (heart) of the score element
-    const heart = document.getElementById(heartId);
-
-    //update 23rd dec
-    chrome.storage.local.get('hearts', function(result) {
-      let heartsArray = result.hearts || [];
-      heartsArray = heartsArray.filter(h => h.id !== heartId);
-      chrome.storage.local.set({ hearts: heartsArray });
+  // Decrement the hearts counter
+  hearts -= 1;
+  // Get the hearts array from storage
+  chrome.storage.local.get("heartsArray", function(result) {
+    // Find the index of the heart in the hearts array
+    const heartIndex = result.heartsArray.findIndex(function(heart) {
+      return heart.id === heartId;
     });
-
-    // Remove it from the score element
-    //if (heart) {
-      //document.getElementById("score").removeChild(heart);
-      //chrome.storage.local.remove(heartId);
-      //console.log("Come back soon!");
-    //}
+    // Remove the heart from the hearts array
+    result.heartsArray.splice(heartIndex, 1);
+    // Save the updated hearts array to storage
+    chrome.storage.local.set({ heartsArray: result.heartsArray });
+    // Update the hearts display
     updateHeartsDisplay();
-  }
+  });
+}
 
 // Remove hearts that have been in the display for more than 16 hours
-
-/*setInterval(function() {
-  // Get all the hearts in the display
-  const current = Date.now();
-  chrome.storage.local.get(null, function(result) {
-    for (const heartId in result) {
-      const addedTime = result[heartId];
-      
-      // Calculate the interval between the current time and the time the heart was added
-      const interval = current - addedTime;
-      // Check if the interval is greater than 10 minutes (600000 milliseconds)
-      console.log("Heart interval:", interval)
-      if (interval > 600000) {
-        // Remove the heart
-        removeHeart(heartId);
-        console.log("heart removed");
-        break;
-      }
-    }
-  });
-}, 10000); */
 
 setInterval(function() {
   // Get all the hearts in the display
   const current = Date.now();
-  //chrome.storage.local.get(null, function(result) {
-    // Get the array of heart IDs
-    //const heartIds = Object.keys(result);
+  chrome.storage.local.get("heartsArray", function(result) {
+    // Get the array of heart objects
+    const heartsArray = result.heartsArray || [];
     // If the array is empty, return from the function
-    //if (heartIds.length === 0) {
-      //return;
-    //}
-
-    //update dec 23rd
-    chrome.storage.local.get('hearts', function(result) {
-    const heartsArray = result.hearts || [];
-    for (const heartId of heartId) {
-      const addedTime = hearts.addedTime;
-      console.log("Current time:", current)
-      console.log("Heart added time:", addedTime)
+    if (heartsArray.length === 0) {
+      return;
+    }
+    for (const heart of heartsArray) {
       // Calculate the interval between the current time and the time the heart was added
-      const interval = current - addedTime;
+      const interval = current - heart.addedTime;
       // Check if the interval is greater than 10 minutes (600000 milliseconds)
-      console.log("Heart interval:", interval)
       if (interval > 600000) {
         // Remove the heart
-        removeHeart(heartId);
+        removeHeart(heart.id);
         console.log("heart removed");
         break;
       }
