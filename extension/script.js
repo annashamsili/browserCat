@@ -48,13 +48,18 @@ window.onload = function() {
 function updateHeartsDisplay() {
   // Clear the current hearts display
   document.getElementById("score").innerHTML = "";
-  // Add the correct number of hearts to the display
-  for (let i = 0; i < Math.min(hearts, 5); i++) {
-    const heart = document.createElement("img");
-    heart.classList.add("heart");
-    document.getElementById("score").appendChild(heart);
-  }
-  console.log("Hearts updated. You have " + hearts + " hearts.");
+  // Get the heartsArray from storage
+  chrome.storage.local.get("heartsArray", function(result) {
+    // If the heartsArray doesn't exist, create an empty array
+    const heartsArray = result.heartsArray || [];
+    // Add the correct number of hearts to the display
+    for (let i = 0; i < Math.min(heartsArray.length, 5); i++) {
+      const heart = document.createElement("img");
+      heart.classList.add("heart");
+      document.getElementById("score").appendChild(heart);
+    }
+    console.log("Hearts updated. You have " + heartsArray.length + " hearts.");
+  });
 }
 
 // create counter for hearts
